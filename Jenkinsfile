@@ -90,7 +90,7 @@ pipeline {
                         exit 1
                     fi
 
-                    if curl -f http://localhost/ >/dev/null 2>&1; then
+                    if curl -f http://localhost:4200/ >/dev/null 2>&1; then
                         echo "Frontend is running"
                     else
                         echo "Frontend test failed"
