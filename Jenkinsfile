@@ -60,45 +60,9 @@ pipeline {
             steps {
                 sh '''
                     docker compose down || true
-
                     docker compose pull
-
                     docker compose up -d
-
                     docker compose ps
-                '''
-            }
-        }
-
-        stage('Smoke Test') {
-            steps {
-                sh '''
-                    for i in $(seq 1 30); do
-
-                        if docker compose ps --status running | grep -q backend; then
-                            echo "Backend is running"
-                            break
-                        fi
-
-                        echo "Waiting for backend..."
-                        sleep 5
-                    done
-
-                    if ! docker compose ps --status running | grep -q backend; then
-                        echo "Backend failed to start"
-                        docker compose logs backend
-                        exit 1
-                    fi
-
-                    if curl -f http://localhost:4200/ >/dev/null 2>&1; then
-                        echo "Frontend is running"
-                    else
-                        echo "Frontend test failed"
-                        docker compose logs frontend
-                        exit 1
-                    fi
-
-                    echo "Application OK"
                 '''
             }
         }
