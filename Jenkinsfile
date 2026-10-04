@@ -30,7 +30,7 @@ pipeline {
             steps {
                 dir('backend') {
                     withSonarQubeEnv('SonarQube') {
-                        sh 'mvn verify sonar:sonar -Dsonar.projectKey=projets-backend -Dsonar.token=$SONAR_AUTH_TOKEN'
+                        sh 'mvn verify sonar:sonar -Dsonar.projectKey=projets-backend'
                     }
                 }
             }
@@ -51,9 +51,27 @@ pipeline {
             }
         }
 
-        stage('6 - Maven Deploy') {
+        stage('6 - Maven Deploy (Nexus)') {
             steps {
-                dir('backend') { sh 'mvn deploy -DskipTests -Dmaven.deploy.skip=true' }
+                withCredentials([usernamePassword(credentialsId: 'nexus-creds',
+                                 usernameVariable: 'NEXUS_USER', passwordVariable: 'NEXUS_PASS')]) {
+                    sh '''
+cat > settings-nexus.xml <<EOF
+<settings>
+  <servers>
+    <server>
+      <id>nexus</id>
+      <username>${NEXUS_USER}</username>
+      <password>${NEXUS_PASS}</password>
+    </server>
+  </servers>
+</settings>
+EOF
+cd backend
+mvn deploy -DskipTests -s ../settings-nexus.xml
+rm -f ../settings-nexus.xml
+                    '''
+                }
             }
         }
 
