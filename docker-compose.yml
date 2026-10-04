@@ -1,20 +1,43 @@
 services:
+  db:
+    build: ./db
+    image: yassmine2004/projets-db:latest
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 40s
 
   backend:
+    build: ./backend
     image: yassmine2004/projets-backend:latest
     container_name: backend
     restart: always
     environment:
       SERVER_PORT: "8081"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://192.168.33.1:3306/test_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/test_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     ports:
       - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       - app-network
 
   frontend:
+    build: ./frontend
     image: yassmine2004/projets-frontend:latest
     container_name: frontend
     restart: always
@@ -24,6 +47,9 @@ services:
       - backend
     networks:
       - app-network
+
+volumes:
+  db-data:
 
 networks:
   app-network:
