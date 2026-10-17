@@ -67,7 +67,7 @@
             <optional>true</optional>
         </dependency>
 
-        <!-- JUnit 5 + Mockito + Spring testing utilities -->
+        <!-- JUnit 5, Mockito and Spring testing utilities -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
