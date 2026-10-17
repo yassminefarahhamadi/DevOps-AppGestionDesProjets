@@ -26,22 +26,28 @@ pipeline {
             }
         }
 
-        stage('3 - SonarQube') {
-            steps {
-                dir('backend') {
-                    withSonarQubeEnv('SonarQube') {
-                        sh 'mvn verify sonar:sonar -Dsonar.projectKey=projets-backend'
-                    }
-                }
-            }
-        }
-
-        stage('4 - Maven Test') {
+        stage('3 - Maven Test + JaCoCo') {
             steps {
                 dir('backend') { sh 'mvn test' }
             }
             post {
-                always { junit allowEmptyResults: true, testResults: 'backend/target/surefire-reports/*.xml' }
+                always {
+                    junit allowEmptyResults: true, testResults: 'backend/target/surefire-reports/*.xml'
+                    // Requires the "JaCoCo" plugin in Jenkins. Remove this step if not installed.
+                    jacoco execPattern: 'backend/target/jacoco.exec',
+                           classPattern: 'backend/target/classes',
+                           sourcePattern: 'backend/src/main/java'
+                }
+            }
+        }
+
+        stage('4 - SonarQube') {
+            steps {
+                dir('backend') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh 'mvn sonar:sonar -Dsonar.projectKey=projets-backend'
+                    }
+                }
             }
         }
 
