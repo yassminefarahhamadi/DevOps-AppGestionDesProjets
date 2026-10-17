@@ -37,7 +37,6 @@ pipeline {
                     sh 'mvn test'
                 }
             }
-
             post {
                 always {
                     junit(
@@ -86,6 +85,7 @@ pipeline {
                 ]) {
                     sh '''
                         set +x
+                        trap 'rm -f settings-nexus.xml' EXIT
 
                         cat > settings-nexus.xml <<EOF
 <settings>
@@ -151,8 +151,10 @@ EOF
 
     post {
         always {
-            sh 'docker logout || true'
-            sh 'rm -f settings-nexus.xml'
+            sh '''
+                docker logout || true
+                rm -f settings-nexus.xml
+            '''
         }
     }
 }
